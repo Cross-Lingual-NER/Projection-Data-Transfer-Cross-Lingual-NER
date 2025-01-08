@@ -1,6 +1,9 @@
 # @package _global_
 
 pipeline:
+  open_orig:
+    transform:
+      cfg_name: ${mlflow_tags.lang}
   fwd_translation:
     transform:
       model_path: null
@@ -20,4 +23,5 @@ log_to_mlflow: True
 mlflow_tags:
   dataset: europarl
 
+# arguments to make it leasy to specify on call
 align_batch_size: 512

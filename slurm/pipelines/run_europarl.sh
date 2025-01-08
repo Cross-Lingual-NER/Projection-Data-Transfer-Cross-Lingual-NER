@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Before running this set of experiments one should download
 # the Europarl dataset into the $WORKSPACE/data/europarl directory
-# using a script src/data/load_europarl_ds.py
+# using a script src/data/load_europarl_ds.py and prepare label2id mapping
+# in the $WORKSPACE/pipelines/label2id_europarl.json
 
 CFG_FILE=$1
 
@@ -27,8 +28,7 @@ LABEL2ID="pipeline.save_generated_ds.transform.label2id_path='$WORKSPACE/pipelin
 for lang in "de" "es" "it"
 do
     LANG_TAG="mlflow_tags.lang=$lang"
-    INPUT="input_args.open_orig='$DATA_DIR/$lang'"
-    AWESOME_ALIGNER=awesome_en_$lang
+    INPUT="input_args.open_orig='ShkalikovOleh/europarl-ner'"
 
     # Model transfer
     $RUN pipeline=model_transfer/eval_compare \
@@ -41,34 +41,40 @@ do
     $RUN pipeline=candidates/dummy_argmax_eval_compare \
             experiment=europarl \
             word_aligner=simalign_mbert_iterative \
+            mlflow_tags.aligner=simalign \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     $RUN pipeline=candidates/ner_argmax_eval_compare \
             experiment=europarl \
             ner_cand_model=$NER_CAND_MODEL \
             word_aligner=simalign_mbert_iterative \
+            mlflow_tags.aligner=simalign \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     $RUN pipeline=candidates/dummy_argmax_eval_compare \
             experiment=europarl \
-            word_aligner=$AWESOME_ALIGNER \
+            word_aligner=awesome_mbert \
+            mlflow_tags.aligner=awesome \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     $RUN pipeline=candidates/ner_argmax_eval_compare \
             experiment=europarl \
             ner_cand_model=$NER_CAND_MODEL \
-            word_aligner=$AWESOME_ALIGNER \
+            word_aligner=awesome_mbert \
+            mlflow_tags.aligner=awesome \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     # Word to word alignments based
     $RUN pipeline=align/src2tgt_eval_compare \
             experiment=europarl \
             word_aligner=simalign_mbert_iterative \
+            mlflow_tags.aligner=simalign \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     $RUN pipeline=align/src2tgt_eval_compare \
             experiment=europarl \
-            word_aligner=$AWESOME_ALIGNER \
+            word_aligner=awesome_mbert \
+            mlflow_tags.aligner=awesome \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
 done
