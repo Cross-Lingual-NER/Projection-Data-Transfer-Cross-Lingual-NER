@@ -1,0 +1,23 @@
+# @package _global_
+
+pipeline:
+  fwd_translation:
+    transform:
+      model_path: null
+      spm_model_path: null
+      dict_path: null
+      lang_list_path: null
+      batch_size: null
+  word_align:
+    transform:
+      batch_size: ${align_batch_size}
+
+input_args:
+  open_orig: ???
+
+log_to_mlflow: True
+
+mlflow_tags:
+  dataset: europarl
+
+align_batch_size: 512

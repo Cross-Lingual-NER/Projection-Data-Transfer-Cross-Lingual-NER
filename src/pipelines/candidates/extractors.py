@@ -4,9 +4,8 @@ extract entity candidates in the target sentence
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Iterable, Tuple
+from typing import Any, Iterable
 
-from nltk import RegexpParser, Tree
 
 from src.pipelines.transforms_base import PipelineTransformBase, batched, extract_key
 
@@ -130,53 +129,6 @@ def extract_subranges(candidates: list[tuple[int, int]]) -> list[tuple[int, int]
             for end in range(start + 1, cand[1] + 1):
                 extended_candidates.append((start, end))
     return extended_candidates
-
-
-class POSRegexpChunkExtractor(CandidateExtractorBase):
-    """Take as an input POS tags provided by, e.g. token classification model
-    and retieve candidates based on them according to specified context-free grammar"""
-
-    def __init__(
-        self,
-        grammar: str,
-        extract_subranges: bool = False,
-        candidate_terminal: str = "CAND",
-    ) -> None:
-        super().__init__()
-
-        self.chunker = RegexpParser(grammar)
-        self.extract_subranges = extract_subranges
-        self.candidate_terminal = candidate_terminal
-
-    def chunk_tree_to_candidates(self, chunk_tree: Tree) -> list[Tuple[int, int]]:
-        shift = 0  # number of words before the current node
-        candidates = []
-        for node in chunk_tree:
-            if isinstance(node, tuple):  # just a tagged word
-                shift += 1
-                continue
-            elif node.label() == self.candidate_terminal:
-                candidates.append(shift, shift + len(node.leaves()))
-            shift += len(node.leaves())
-
-        return candidates
-
-    def extract(
-        self, tgt_words: list[str], src_entities: list[dict[str, Any]], **kwargs
-    ) -> list[tuple[int, int]]:
-        pos_labels = kwargs.pop("pos_labels")
-
-        if len(pos_labels) != len(tgt_words):
-            logger.warning("Number of POS tags and tgt_words are different!")
-
-        tagged_words = list(zip(tgt_words, pos_labels))
-        chunk_tree = self.chunker(tagged_words)
-        candidates = self.chunk_tree_to_candidates(chunk_tree)
-
-        if self.extract_subranges:
-            candidates = extract_subranges(candidates)
-
-        return candidates
 
 
 class CandidateNERExtractor(CandidateExtractorBase):

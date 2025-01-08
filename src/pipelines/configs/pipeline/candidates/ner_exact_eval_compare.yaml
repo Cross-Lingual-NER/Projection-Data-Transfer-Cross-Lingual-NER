@@ -15,7 +15,7 @@ pipeline:
   fwd_translation:
     deps: [detokenize]
     transform:
-      _target_: src.pipelines.translation.FairseqTranslationTransform
+      _target_: src.pipelines.translation.TransformersTranslationTransform
       model_path: ???
       batch_size: ???
       tgt_lang: de
