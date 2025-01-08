@@ -34,6 +34,7 @@ do
     $RUN pipeline=model_transfer/eval_compare \
         log_to_mlflow=true \
         +mlflow_tags.dataset=europarl \
+        pipeline.open_orig.transform.cfg_name=$lang \
         ner_model=$NER_CAND_MODEL \
         $INPUT $LANG_TAG $LABEL2ID
 
@@ -41,40 +42,40 @@ do
     $RUN pipeline=candidates/dummy_argmax_eval_compare \
             experiment=europarl \
             word_aligner=simalign_mbert_iterative \
-            mlflow_tags.aligner=simalign \
+            +mlflow_tags.aligner=simalign \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     $RUN pipeline=candidates/ner_argmax_eval_compare \
             experiment=europarl \
             ner_cand_model=$NER_CAND_MODEL \
             word_aligner=simalign_mbert_iterative \
-            mlflow_tags.aligner=simalign \
+            +mlflow_tags.aligner=simalign \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     $RUN pipeline=candidates/dummy_argmax_eval_compare \
             experiment=europarl \
             word_aligner=awesome_mbert \
-            mlflow_tags.aligner=awesome \
+            +mlflow_tags.aligner=awesome \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     $RUN pipeline=candidates/ner_argmax_eval_compare \
             experiment=europarl \
             ner_cand_model=$NER_CAND_MODEL \
             word_aligner=awesome_mbert \
-            mlflow_tags.aligner=awesome \
+            +mlflow_tags.aligner=awesome \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     # Word to word alignments based
     $RUN pipeline=align/src2tgt_eval_compare \
             experiment=europarl \
             word_aligner=simalign_mbert_iterative \
-            mlflow_tags.aligner=simalign \
+            +mlflow_tags.aligner=simalign \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
     $RUN pipeline=align/src2tgt_eval_compare \
             experiment=europarl \
             word_aligner=awesome_mbert \
-            mlflow_tags.aligner=awesome \
+            +mlflow_tags.aligner=awesome \
             use_cached=True $LANG_TAG $INPUT $CACHE $LABEL2ID
 
 done
