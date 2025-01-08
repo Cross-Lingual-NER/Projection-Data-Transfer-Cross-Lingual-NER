@@ -1,0 +1,46 @@
+# @package _global_
+
+pipeline:
+  open_orig:
+    deps: []
+    transform:
+      _target_: src.pipelines.data.LoadHFDataset
+      cfg_name: null
+      split: test
+      label2id_save_path: label2id.json
+  labeling:
+    deps: [open_orig]
+    transform:
+      _target_: src.pipelines.model_transfer.token_classification.TokenClassificationTransform
+      model_path: ${ner_model}
+      device: 0
+      batch_size: 512
+      column_key: tokens
+  save_generated_ds:
+    deps: [labeling]
+    transform:
+      _target_: src.pipelines.data.WriteGeneratedDataset
+      label2id_path: ${pipeline.open_orig.transform.label2id_save_path}
+      out_path: generated_ds
+  open_gen:
+    deps: [save_generated_ds]
+    transform:
+      _target_: src.pipelines.data.OpenArrow
+  evaluate:
+    deps: [open_orig, open_gen]
+    transform:
+      _target_: src.pipelines.eval.EvaluateByCompareTransform
+      log_to_mlflow: ${log_to_mlflow}
+
+input_args:
+  open_orig: ???
+
+ner_model: julian-schelb/roberta-ner-multilingual
+
+mlflow_tags:
+  task: pipeline_eval
+  pipeline_type: model_transfer
+  eval_type: compare_to_original
+
+mlflow_artifacts_paths:
+  gen_ds: ${pipeline.save_generated_ds.transform.out_path}

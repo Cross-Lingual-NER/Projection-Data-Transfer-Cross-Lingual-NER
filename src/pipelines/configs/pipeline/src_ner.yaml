@@ -1,0 +1,42 @@
+# @package _global_
+
+pipeline:
+  open_translation:
+    deps: []
+    transform:
+      _target_: src.pipelines.data.OpenArrow
+  split_words:
+    deps: [open_translation]
+    transform:
+      _target_: src.pipelines.word_splitting.WordSplitTransform
+      sent_column_key: ${src_lang}_translation
+      out_key: words
+      word_splitter:
+        _target_: src.pipelines.word_splitting.NLTKSplitter
+  ner:
+    deps: [split_words]
+    transform:
+      _target_:  src.pipelines.ner.NERTransform
+      model_path: ${ner_model}
+      device: 0
+      batch_size: ${ner_batch_size}
+      column_key: words
+      wordwise: True
+      filter_punctuation: False
+      label2id_save_path: label2id.json
+  save_entities:
+    deps: [ner]
+    transform:
+      _target_: src.pipelines.data.WriteToArrow
+      schema: ${schemas.entities_with_words}
+      buffer_size: 1024
+      path: src_entities.arrow
+
+log_to_mlflow: False
+
+input_args:
+  open_translation: ???
+
+src_lang: ???
+ner_model: ???
+ner_batch_size: 512

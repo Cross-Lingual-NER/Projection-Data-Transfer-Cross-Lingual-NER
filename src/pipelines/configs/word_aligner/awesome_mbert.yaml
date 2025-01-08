@@ -1,0 +1,5 @@
+# @package word_aligner
+
+_target_: src.pipelines.align.word_aligners.AwesomeAligner
+model_path: bert-base-multilingual-cased
+device: 0

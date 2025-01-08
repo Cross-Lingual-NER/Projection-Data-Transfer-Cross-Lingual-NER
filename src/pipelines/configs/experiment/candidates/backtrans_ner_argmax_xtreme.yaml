@@ -1,0 +1,48 @@
+# @package _global_
+
+defaults:
+  - override /pipeline: candidates/ner_argmax_eval_compare
+
+pipeline:
+  open_orig:
+    transform:
+      cfg_name: PAN-X.${lang}
+  fwd_translation:
+    transform:
+      _target_: src.pipelines.translation.TransformersTranslationTransform
+      model_path: facebook/nllb-200-3.3B
+      batch_size: ${trans_batch_size}
+      column_key: tgt_text
+      device: 0
+      src_lang: ${lang}
+      tgt_lang: en
+      src_lang_code: ${lang}_Latn
+      tgt_lang_code: eng_Latn
+  ner:
+    transform:
+      batch_size: ${ner_batch_size}
+  ner_candidates:
+    transform:
+      batch_size: ${ner_batch_size}
+  back_translation:
+    transform:
+      batch_size: ${trans_batch_size}
+  word_align:
+    transform:
+      batch_size: ${align_batch_size}
+
+input_args:
+  open_orig: google/xtreme
+
+log_to_mlflow: True
+
+mlflow_tags:
+  lang: ${lang}
+  dataset: xtreme
+
+lang: ???
+
+# arguments to make it leasy to specify on call
+trans_batch_size: 32
+ner_batch_size: 256
+align_batch_size: 256

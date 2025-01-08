@@ -1,0 +1,19 @@
+defaults:
+  - schemas/entity
+  - schemas/words
+  - schemas/translation
+  - schemas/slotted_sentence
+  - schemas/pos
+  - hydra: slurm
+  - paths: default
+  - runner: single_thread
+  - word_aligner: simalign_mbert_iterative
+  - pipeline: null
+  - experiment: null
+
+log_to_mlflow: true
+use_cached: false
+cached_step_outs: null
+
+mlflow_tags:
+  lang: hsb

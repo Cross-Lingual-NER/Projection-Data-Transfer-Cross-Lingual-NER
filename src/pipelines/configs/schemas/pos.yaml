@@ -1,0 +1,10 @@
+# @package schemas
+
+pos_labels:
+  _target_: pyarrow.schema
+  _args_:
+    -
+      - _target_: pyarrow.field
+        _args_:
+          - pos_labels
+          - ${schemas.string_list}

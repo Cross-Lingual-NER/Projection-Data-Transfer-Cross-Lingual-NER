@@ -1,0 +1,7 @@
+# @package word_aligner
+
+_target_: src.pipelines.align.word_aligners.SimAlignAligner
+model: bert
+token_type: bpe
+matching_methods: i
+device: 0

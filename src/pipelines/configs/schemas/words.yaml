@@ -1,0 +1,16 @@
+# @package schemas
+
+string_list:
+  _target_: pyarrow.list_
+  _args_:
+    - _target_: pyarrow.string
+
+labeled_words:
+  _target_: pyarrow.schema
+  _args_:
+    -
+      - _target_: pyarrow.field
+        _args_:
+          - words
+          - ${schemas.string_list}
+      - ${schemas.entities_field}

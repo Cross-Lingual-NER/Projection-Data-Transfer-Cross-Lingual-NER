@@ -1,0 +1,42 @@
+# @package schemas
+
+entity:
+  _target_: pyarrow.struct
+  _args_:
+    -
+      - _target_: pyarrow.field
+        _args_:
+          - start_idx
+          - _target_: pyarrow.int32
+      - _target_: pyarrow.field
+        _args_:
+          - end_idx
+          - _target_: pyarrow.int32
+      - _target_: pyarrow.field
+        _args_:
+          - label
+          - _target_: pyarrow.string
+
+entities_field:
+  _target_: pyarrow.field
+  _args_:
+    - entities
+    - _target_: pyarrow.list_
+      _args_:
+        - ${schemas.entity}
+
+entities:
+  _target_: pyarrow.schema
+  _args_:
+    -
+      - ${schemas.entities_field}
+
+entities_with_words:
+  _target_: pyarrow.schema
+  _args_:
+    -
+      - ${schemas.entities_field}
+      - _target_: pyarrow.field
+        _args_:
+          - words
+          - ${schemas.string_list}

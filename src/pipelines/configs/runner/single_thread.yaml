@@ -1,0 +1,3 @@
+# @package runner
+
+_target_: src.pipelines.runners.SingleThreadRunner

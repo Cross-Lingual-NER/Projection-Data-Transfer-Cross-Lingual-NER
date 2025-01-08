@@ -1,0 +1,48 @@
+# @package _global_
+
+pipeline:
+  open_orig:
+    deps: []
+    transform:
+      _target_: src.pipelines.data.LoadHFDataset
+      cfg_name: null
+      split: test
+  detokenize:
+    deps: [open_orig]
+    transform:
+      _target_: src.pipelines.word_splitting.DetokenizeTransform
+  fwd_translation:
+    deps: [detokenize]
+    transform:
+      _target_: src.pipelines.translation.TransformersTranslationTransform
+      model_path: facebook/nllb-200-3.3B
+      batch_size: ${trans_batch_size}
+      column_key: tgt_text
+      device: 0
+      src_lang: ${src_lang}
+      tgt_lang: ${tgt_lang}
+      src_lang_code: ${src_lang}_Latn
+      tgt_lang_code: ${tgt_lang}_Latn
+  save_translation:
+    deps: [fwd_translation]
+    transform:
+      _target_: src.pipelines.data.WriteToArrow
+      schema:
+        _target_: pyarrow.schema
+        _args_:
+          -
+            - _target_: pyarrow.field
+              _args_:
+                - ${pipeline.fwd_translation.transform.tgt_lang}_translation
+                - _target_: pyarrow.string
+      buffer_size: 1024
+      path: fwd_translation_nllb_${src_lang}_${tgt_lang}_.arrow
+
+log_to_mlflow: False
+
+input_args:
+  open_orig: ???
+
+src_lang: ???
+tgt_lang: ???
+trans_batch_size: 32

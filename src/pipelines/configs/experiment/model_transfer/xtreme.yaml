@@ -1,0 +1,26 @@
+# @package _global_
+
+defaults:
+  - override /pipeline: model_transfer/eval_compare
+
+pipeline:
+  open_orig:
+    transform:
+      cfg_name: PAN-X.${lang}
+  labeling:
+    transform:
+      batch_size: ${ner_batch_size}
+
+input_args:
+  open_orig: google/xtreme
+
+log_to_mlflow: True
+
+mlflow_tags:
+  lang: ${lang}
+  dataset: xtreme
+
+# arguments to make it leasy to specify on call
+lang: ???
+ner_batch_size: 512
+ner_model: julian-schelb/roberta-ner-multilingual

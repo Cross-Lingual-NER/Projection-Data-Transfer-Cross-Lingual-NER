@@ -1,0 +1,19 @@
+# @package schemas
+
+de_translation:
+  _target_: pyarrow.schema
+  _args_:
+    -
+      - _target_: pyarrow.field
+        _args_:
+          - de_translation
+          - _target_: pyarrow.string
+
+hsb_translation:
+  _target_: pyarrow.schema
+  _args_:
+    -
+      - _target_: pyarrow.field
+        _args_:
+          - hsb_translation
+          - _target_: pyarrow.string

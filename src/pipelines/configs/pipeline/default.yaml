@@ -1,0 +1,4 @@
+# @package _global_
+
+defaults:
+  - candidates/ner_argmax_eval_compare

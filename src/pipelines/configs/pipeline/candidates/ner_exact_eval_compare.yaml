@@ -1,0 +1,155 @@
+# @package _global_
+
+pipeline:
+  open_orig:
+    deps: []
+    transform:
+      _target_: src.pipelines.data.LoadHFDataset
+      cfg_name: null
+      split: test
+      label2id_save_path: label2id.json
+  detokenize:
+    deps: [open_orig]
+    transform:
+      _target_: src.pipelines.word_splitting.DetokenizeTransform
+  fwd_translation:
+    deps: [detokenize]
+    transform:
+      _target_: src.pipelines.translation.FairseqTranslationTransform
+      model_path: ???
+      batch_size: ???
+      tgt_lang: de
+      src_lang: hsb
+      device: 0
+      column_key: tgt_text
+  save_translation:
+    deps: [fwd_translation]
+    transform:
+      _target_: src.pipelines.data.WriteToArrow
+      schema:
+        _target_: pyarrow.schema
+        _args_:
+          -
+            - _target_: pyarrow.field
+              _args_:
+                - ${pipeline.fwd_translation.transform.tgt_lang}_translation
+                - _target_: pyarrow.string
+      buffer_size: 1024
+      path: fwd_translation.arrow
+  open_translation:
+    deps: [save_translation]
+    transform:
+      _target_: src.pipelines.data.OpenArrow
+  split_words:
+    deps: [open_translation]
+    transform:
+      _target_: src.pipelines.word_splitting.WordSplitTransform
+      sent_column_key: ${pipeline.fwd_translation.transform.tgt_lang}_translation
+      out_key: words
+      word_splitter:
+        _target_: src.pipelines.word_splitting.NLTKSplitter
+  ner:
+    deps: [split_words]
+    transform:
+      _target_:  src.pipelines.ner.NERTransform
+      model_path: ${ner_model}
+      device: 0
+      batch_size: 512
+      column_key: words
+      wordwise: True
+      filter_punctuation: False
+  save_entities:
+    deps: [ner]
+    transform:
+      _target_: src.pipelines.data.WriteToArrow
+      schema: ${schemas.entities_with_words}
+      buffer_size: 1024
+      path: entities.arrow
+  open_entities:
+    deps: [save_entities]
+    transform:
+      _target_: src.pipelines.data.OpenArrow
+  ner_candidates:
+    deps: [open_orig]
+    transform:
+      _target_:  src.pipelines.ner.NERTransform
+      model_path: ${ner_cand_model}
+      device: 0
+      batch_size: 512
+      column_key: tokens
+      wordwise: True
+      filter_punctuation: False
+  save_target_cand:
+    deps: [ner_candidates]
+    transform:
+      _target_: src.pipelines.data.WriteToArrow
+      schema: ${schemas.entities}
+      buffer_size: 1024
+      path: tgt_cand_entities.arrow
+  open_target_cand:
+    deps: [save_target_cand]
+    transform:
+      _target_: src.pipelines.data.OpenArrow
+  rename_cand_entity:
+    deps: [open_target_cand]
+    transform:
+      _target_: src.pipelines.transforms_base.RenameTransform
+      keys_map:
+        entities: cand_entities
+  merge_orig_entities_cand:
+    deps: [open_entities, open_orig, rename_cand_entity]
+    transform:
+      _target_: src.pipelines.transforms_base.MergeTransform
+  word_align:
+    deps: [merge_orig_entities_cand]
+    transform:
+      _target_: src.pipelines.align.word_aligners.WordAlignTransform
+      input_orig_words_key: tokens
+      input_trans_words_key: words
+      batch_size: 512
+      word_aligner: ${word_aligner}
+  candidate_extraction:
+    deps: [word_align]
+    transform:
+      _target_: src.pipelines.candidates.extractors.CandidateExtractionTransform
+      input_words_key: tokens
+      extractor:
+        _target_: src.pipelines.candidates.extractors.CandidateNERExtractor
+        extract_subranges: False
+        entities_key: cand_entities
+  projection:
+    deps: [candidate_extraction]
+    transform:
+      _target_: src.pipelines.candidates.projection.BipartiteCandidatesMatchingProjectionTransform
+      input_orig_words_key: tokens
+  save_generated_ds:
+    deps: [projection]
+    transform:
+      _target_: src.pipelines.data.WriteGeneratedDataset
+      label2id_path: ${pipeline.open_orig.transform.label2id_save_path}
+      out_path: generated_ds
+  open_gen:
+    deps: [save_generated_ds]
+    transform:
+      _target_: src.pipelines.data.OpenArrow
+  evaluate:
+    deps: [open_orig, open_gen]
+    transform:
+      _target_: src.pipelines.eval.EvaluateByCompareTransform
+      log_to_mlflow: ${log_to_mlflow}
+
+input_args:
+  open_orig: ???
+
+ner_model: julian-schelb/roberta-ner-multilingual
+ner_cand_model: ???
+
+mlflow_tags:
+  task: pipeline_eval
+  pipeline_type: candidates
+  candidate_selection: ner
+  candidate_matching: bipartite_matching
+  eval_type: compare_to_original
+
+mlflow_artifacts_paths:
+  gen_ds: ${pipeline.save_generated_ds.transform.out_path}

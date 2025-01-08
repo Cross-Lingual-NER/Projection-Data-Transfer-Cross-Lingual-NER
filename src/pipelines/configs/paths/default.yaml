@@ -1,0 +1,11 @@
+# @package paths
+
+workspace_dir: ${env:WORKSPACE}
+data_dir: ${paths.workspace_dir}/data
+lmu21_dir: ${paths.workspace_dir}/translation_models/LMU21
+mbart50_dir: ${paths.workspace_dir}/translation_models/MBart50
+mbart50_xlang_dir: ${paths.workspace_dir}/translation_models/MBart50_xlangs
+pretrained_dir: ${paths.workspace_dir}/translation_models/pretrained
+
+output_dir: ${hydra:run.dir}
+work_dir: ${hydra:runtime.cwd}

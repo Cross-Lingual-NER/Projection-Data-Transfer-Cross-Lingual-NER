@@ -1,0 +1,10 @@
+SRC_DIR=path_to_repo
+WORKSPACE=path_to_workspace
+VENV_DIR=path_to_python_virtual_env
+MLFLOW_SAVE_CHECKPOINTS=true to log last and best ckpt to MLFlow
+MLFLOW_TRACKING_URI=link_to_the_mlflow_server
+MLFLOW_TRACKING_PASSWORD=password (don't forget about escaping)
+MLFLOW_TRACKING_USERNAME=user_name
+MLFLOW_EXPERIMENT_NAME=experiment_name
+HF_HOME=huggingface_cache_dir
+NLTK_DATA=nltk_cache_dir

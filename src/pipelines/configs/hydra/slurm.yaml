@@ -1,0 +1,8 @@
+# @package _global_
+
+hydra:
+  run:
+    dir: ./outputs/${now:%Y-%m-%d}/job_${env:SLURM_JOB_ID}
+
+mlflow_tags:
+  slurm_job: "${env:SLURM_JOB_ID}"

@@ -1,0 +1,41 @@
+# @package _global_
+
+pipeline:
+  open_src_entities:
+    deps: []
+    transform:
+      _target_: src.pipelines.data.OpenArrow
+  back_translation:
+    deps: [open_src_entities]
+    transform:
+      _target_: src.pipelines.easy_project.translation.EasyProjectBackTranslationTransform
+      model_path: ychenNLP/nllb-200-3.3B-easyproject
+      batch_size: ${trans_batch_size}
+      device: 0
+      src_lang: ${src_lang}
+      tgt_lang: ${tgt_lang}
+      src_lang_code: ${src_lang}_Latn
+      tgt_lang_code: ${tgt_lang}_Latn
+      src_words_key: words
+      src_entities_key: entities
+      word_splitter:
+        _target_: src.pipelines.word_splitting.WikiannSplitter
+      sim_threshold: 0.5
+      out_entities_key: entities
+      out_words_key: words
+  save_entities:
+    deps: [back_translation]
+    transform:
+      _target_: src.pipelines.data.WriteToArrow
+      schema: ${schemas.entities_with_words}
+      buffer_size: 1024
+      path: tgt_entities.arrow
+
+log_to_mlflow: False
+
+input_args:
+  open_src_entities: ???
+
+src_lang: ???
+tgt_lang: ???
+trans_batch_size: 32

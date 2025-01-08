@@ -1,0 +1,31 @@
+# @package _global_
+
+defaults:
+  - override /pipeline: model_transfer/eval_compare
+
+pipeline:
+  open_orig:
+    transform:
+      cfg_name: ${lang}
+  labeling:
+    transform:
+      batch_size: ${ner_batch_size}
+  evaluate:
+    transform:
+      labels_to_ignore:
+        - B-DATE
+        - I-DATE
+
+input_args:
+  open_orig: masakhane/masakhaner2
+
+log_to_mlflow: True
+
+mlflow_tags:
+  lang: ${lang}
+  dataset: masakhaner2
+
+# arguments to make it leasy to specify on call
+lang: ???
+ner_batch_size: 512
+ner_model: julian-schelb/roberta-ner-multilingual

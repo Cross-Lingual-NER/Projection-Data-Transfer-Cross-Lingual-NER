@@ -1,0 +1,14 @@
+# @package schemas
+
+slotted_sentence:
+  _target_: pyarrow.schema
+  _args_:
+    -
+      - _target_: pyarrow.field
+        _args_:
+          - slotted_text
+          - _target_: pyarrow.string
+      - _target_: pyarrow.field
+        _args_:
+          - slot_labels
+          - ${schemas.string_list}
