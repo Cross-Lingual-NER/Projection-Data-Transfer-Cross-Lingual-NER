@@ -6,14 +6,16 @@ This GitHub repository provides the code and resources for our paper, accepted f
 
     ├── LICENSE
     ├── README.md
-    ├── requirements.txt   <- Requirements file for reproducing the analysis environment
-    ├── setup.py           <- Makes project pip installable (pip install -e .)
-    └─── src               <- Source code for use in this project.
-        ├── data           <- Scripts to download, preproces or generate data
-        ├── models         <- Scripts to train models and infer models*
-        │   └── ner        <- Named Entity Recognition models (based on HF Transformers)
-        └── pipelines      <- XLNER pipelines, transforms and config files
-            └── configs    <- YAML configs for different pipeline types and experiments
+    ├── experiments_results <- CSV files containing full experiment results
+    ├── slurm               <- SLURM jobs to run experiments from the paper
+    ├── requirements.txt    <- Requirements file for reproducing the analysis environment
+    ├── setup.py            <- Makes project pip installable (pip install -e .)
+    └─── src                <- Source code for use in this project.
+        ├── data            <- Scripts to download, preproces or generate data
+        ├── models          <- Scripts to train models and infer models*
+        │   └── ner         <- Named Entity Recognition models (based on HF Transformers)
+        └── pipelines       <- XLNER pipelines, transforms and config files
+            └── configs     <- YAML configs for different pipeline types and experiments
 --------
 *all experiments have been conducted using already pretrained models available on the HF Hub
 
@@ -57,17 +59,17 @@ pipeline:
   step1:
     deps: []
     transform:
-      _target_: my_module.TransformClass1
+      _target_: src.pipelines.TransformClass1
       argument_name: argument_value
   step2:
     deps: [step1]
     transform:
-      _target_: my_module.TransformClass2
+      _target_: src.pipelines.TransformClass2
       argument_name: argument_value
   step3:
     deps: [step1, step2]
     transform:
-      _target_: my_module.TransformClass3
+      _target_: src.pipelines.TransformClass3
       argument_name: argument_value
 ```
 
