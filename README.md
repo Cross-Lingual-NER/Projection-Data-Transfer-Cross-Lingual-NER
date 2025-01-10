@@ -31,7 +31,6 @@ All SLURM job scripts in the `slurm` folder take the path to a file containing t
 SRC_DIR=path_to_repo
 WORKSPACE=path_to_workspace
 VENV_DIR=path_to_python_virtual_env
-MLFLOW_SAVE_CHECKPOINTS=true # Log last and best checkpoints to MLFlow
 MLFLOW_TRACKING_URI=link_to_the_mlflow_server
 MLFLOW_TRACKING_PASSWORD=password # Escape special characters as necessary
 MLFLOW_TRACKING_USERNAME=user_name
